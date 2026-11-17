@@ -1,0 +1,1076 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Week Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F6F1; --panel:#FFFFFF; --panel-2:#EAF0E8; --ink:#1E2B30; --muted:#5D6B66;
+  --rule:#D2DCD3; --rule-faint:#E3EAE2; --green:#2E6B50; --green-soft:#DCEBE1;
+  --red:#AE3A2F; --red-soft:#F6E0DC; --amber:#9A6514; --amber-soft:#F5E9CF;
+  --mine:#3D5A8C; --mine-soft:#E1E8F4; --focus:#2E6B50; --shadow:0 1px 0 rgba(30,43,48,.06);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111816; --panel:#18211E; --panel-2:#1F2A26; --ink:#E3EAE5; --muted:#9AA8A2;
+    --rule:#2E3B36; --rule-faint:#222D29; --green:#74C29A; --green-soft:#1F3A2D;
+    --red:#E58275; --red-soft:#3D2420; --amber:#E2AE58; --amber-soft:#3A2F1A;
+    --mine:#93AEE0; --mine-soft:#232F45; --focus:#74C29A; --shadow:none;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111816; --panel:#18211E; --panel-2:#1F2A26; --ink:#E3EAE5; --muted:#9AA8A2;
+  --rule:#2E3B36; --rule-faint:#222D29; --green:#74C29A; --green-soft:#1F3A2D;
+  --red:#E58275; --red-soft:#3D2420; --amber:#E2AE58; --amber-soft:#3A2F1A;
+  --mine:#93AEE0; --mine-soft:#232F45; --focus:#74C29A; --shadow:none;
+  color-scheme: dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+a{color:var(--green)}
+
+/* Header */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:18px 24px 14px;border-bottom:1px solid var(--rule);background:var(--panel)}
+.title{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-right:auto}
+.title h1{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:0;line-height:1.1}
+.title .range{color:var(--muted);font-weight:500;font-size:16px}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:7px 14px;font-weight:600;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.seg button+button{border-left:1px solid var(--rule)}
+.nav{display:inline-flex;gap:6px;align-items:center}
+.btn{border:1px solid var(--rule);background:var(--panel);border-radius:8px;padding:7px 12px;font-weight:600;font-size:14px}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+:root[data-theme="dark"] .btn.primary{color:#0F1A15}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:#0F1A15}}
+.btn.icon{padding:7px 10px;min-width:36px}
+.btn.danger{color:var(--red)}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:10px 24px;border-bottom:1px solid var(--rule)}
+.search{flex:1 1 220px;max-width:340px;border:1px solid var(--rule);background:var(--panel);border-radius:8px;padding:7px 11px}
+.sync{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;margin-left:auto}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.dot.ok{background:var(--green)} .dot.err{background:var(--red)} .dot.busy{background:var(--amber)}
+.linkbtn{border:0;background:none;padding:0;color:var(--green);font-weight:600;font-size:13px;text-decoration:underline;text-underline-offset:2px}
+
+/* Layout */
+.wrap{display:grid;grid-template-columns:280px minmax(0,1fr);gap:0;min-height:calc(100vh - 140px)}
+.rail{border-right:1px solid var(--rule);padding:16px 16px 24px;background:var(--panel-2)}
+.rail h2,.panel-h{font-size:15px;font-weight:700;margin:0 0 4px}
+.rail .sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+.main{padding:16px 24px 32px;min-width:0}
+.notice{border:1px solid var(--rule);background:var(--panel);border-left:4px solid var(--amber);border-radius:8px;padding:10px 12px;margin:0 0 14px;font-size:14px}
+.notice.err{border-left-color:var(--red)}
+.notice p{margin:0 0 6px} .notice p:last-child{margin:0}
+
+/* Week ledger */
+.week{display:grid;gap:0;border:1px solid var(--rule);border-radius:10px;background:var(--panel);overflow-x:auto}
+.col{min-width:200px;display:flex;flex-direction:column;border-right:1px solid var(--rule)}
+.col:last-child{border-right:0}
+.col-h{padding:12px 12px 10px;border-bottom:2px solid var(--ink);position:relative}
+.col.today .col-h{background:var(--green-soft)}
+.col-h .dn{display:flex;align-items:baseline;gap:8px}
+.col-h .num{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.col-h .wd{font-weight:600;color:var(--muted);font-size:14px}
+.col.today .wd{color:var(--green)}
+.load{margin-top:8px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:6px}
+.bar{height:5px;background:var(--rule-faint);border-radius:3px;margin-top:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green);border-radius:3px}
+.bar.over i{background:var(--red)}
+.col-b{flex:1;padding:8px;min-height:340px;display:flex;flex-direction:column;gap:6px;
+  background-image:repeating-linear-gradient(to bottom,transparent 0 35px,var(--rule-faint) 35px 36px);background-position:0 8px}
+.col-b.drag-over,.cell.drag-over,.bcol-b.drag-over{outline:2px dashed var(--green);outline-offset:-4px;background-color:var(--green-soft)}
+.empty{color:var(--muted);font-size:13px;padding:6px 4px}
+
+/* Cards */
+.card{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--green);border-radius:6px;padding:7px 9px 8px;box-shadow:var(--shadow)}
+.card.mine{border-left-color:var(--mine)}
+.card.done{opacity:.55}
+.card.done .t{text-decoration:line-through}
+.card:hover{border-color:var(--muted)}
+.card[draggable="true"]{cursor:grab}
+.card .c{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .t{font-size:14px;font-weight:500;line-height:1.3;margin-top:1px;overflow-wrap:anywhere}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tag{font-size:11.5px;font-weight:600;padding:1px 6px;border-radius:4px;background:var(--panel-2);color:var(--muted);white-space:nowrap}
+.tag.late{background:var(--red-soft);color:var(--red)}
+.tag.soon{background:var(--amber-soft);color:var(--amber)}
+.tag.mine{background:var(--mine-soft);color:var(--mine)}
+.tag.sign{background:var(--green-soft);color:var(--green)}
+.tag.prio{background:var(--red-soft);color:var(--red)}
+.rail .list{display:flex;flex-direction:column;gap:6px}
+.count{display:inline-block;min-width:22px;text-align:center;font-size:12px;font-weight:700;background:var(--red-soft);color:var(--red);border-radius:10px;padding:0 6px;margin-left:6px}
+.count.n{background:var(--panel);color:var(--muted)}
+
+/* Board */
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,1fr);gap:12px;overflow-x:auto;padding-bottom:6px}
+.bcol{background:var(--panel-2);border:1px solid var(--rule);border-radius:10px;display:flex;flex-direction:column;min-height:420px}
+.bcol-h{padding:10px 12px;border-bottom:1px solid var(--rule);display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.bcol-h b{font-size:15px}
+.bcol-h span{font-size:12px;color:var(--muted)}
+.bcol.late .bcol-h b{color:var(--red)}
+.bcol-b{padding:8px;display:flex;flex-direction:column;gap:6px;flex:1;max-height:70vh;overflow-y:auto}
+
+/* Month */
+.month{border:1px solid var(--rule);border-radius:10px;background:var(--panel);overflow-x:auto}
+.mgrid{display:grid;grid-template-columns:repeat(7,minmax(110px,1fr))}
+.mh{padding:8px 10px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid var(--ink)}
+.cell{min-height:112px;border-right:1px solid var(--rule-faint);border-bottom:1px solid var(--rule-faint);padding:6px 7px;text-align:left;background:transparent;border-top:0;border-left:0;display:flex;flex-direction:column;gap:3px}
+.cell:nth-child(7n){border-right:0}
+.cell.out{color:var(--muted);background:var(--panel-2)}
+.cell .d{font-weight:700;font-size:14px}
+.cell.today .d{color:var(--panel);background:var(--green);border-radius:4px;padding:0 5px;align-self:flex-start}
+.chip{font-size:12px;line-height:1.3;padding:1px 5px;border-radius:3px;background:var(--green-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.chip.mine{background:var(--mine-soft)}
+.chip.late{background:var(--red-soft);color:var(--red)}
+.more{font-size:12px;color:var(--muted);font-weight:600}
+
+/* Dialogs */
+dialog{border:1px solid var(--rule);border-radius:12px;background:var(--panel);color:var(--ink);padding:0;width:min(520px,calc(100vw - 24px));max-height:calc(100vh - 40px)}
+dialog::backdrop{background:rgba(10,20,16,.45)}
+.dlg{padding:18px 20px 20px}
+.dlg h3{margin:0 0 2px;font-size:19px;line-height:1.25}
+.dlg .client{color:var(--muted);font-weight:600;font-size:14px;margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:4px;margin:12px 0}
+.field label{font-size:13px;font-weight:600;color:var(--muted)}
+.field input,.field select,.field textarea{border:1px solid var(--rule);border-radius:8px;padding:8px 10px;background:var(--panel)}
+.field textarea{min-height:72px;resize:vertical}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row .field{flex:1 1 140px}
+.quick{display:flex;gap:6px;flex-wrap:wrap}
+.quick .btn{padding:5px 10px;font-size:13px}
+.actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px}
+.actions .spacer{margin-right:auto}
+.meta{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px;margin:6px 0 4px}
+.meta dt{color:var(--muted)} .meta dd{margin:0}
+.check{display:flex;gap:8px;align-items:center;font-size:14px;margin:10px 0}
+.setup{max-width:520px;background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:20px 22px}
+.setup h2{margin:0 0 6px;font-size:20px}
+.setup p{margin:0 0 12px;color:var(--muted)}
+.flash{border:1px solid var(--rule);border-left:4px solid var(--green);background:var(--panel);border-radius:8px;padding:10px 12px;margin:0 0 14px;font-size:14px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.section-h{font-size:13px;font-weight:700;color:var(--muted);margin:18px 0 0;padding-top:12px;border-top:1px solid var(--rule)}
+.changes{margin:10px 0 0;padding-left:18px;font-size:14px}
+.changes li{margin:4px 0}
+.warn{background:var(--amber-soft);color:var(--amber);border-radius:6px;padding:8px 10px;font-size:13px;margin:10px 0 0}
+.errbox{background:var(--red-soft);color:var(--red);border-radius:6px;padding:8px 10px;font-size:13px;margin:10px 0 0}
+.toggle{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden;margin:10px 0 2px}
+.toggle button{border:0;background:var(--panel);padding:7px 14px;font-weight:600;font-size:14px;color:var(--muted)}
+.toggle button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.toggle button+button{border-left:1px solid var(--rule)}
+.hint{color:var(--muted);font-size:13px;margin:4px 0 0}
+.btn[disabled]{opacity:.55;cursor:default}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--green)}
+.legend span.m::before{background:var(--mine)}
+
+@media (max-width: 860px){
+  .wrap{grid-template-columns:1fr}
+  .rail{border-right:0;border-bottom:1px solid var(--rule)}
+  .rail .list{max-height:260px;overflow-y:auto}
+  .top,.toolbar{padding-left:14px;padding-right:14px}
+  .main{padding:14px}
+  .title h1{font-size:23px}
+  .sync{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="title"><h1 id="h1">My week</h1><span class="range" id="range"></span></div>
+  <div class="nav" id="nav">
+    <button class="btn icon" id="prev" aria-label="Previous">‹</button>
+    <button class="btn" id="todayBtn">Today</button>
+    <button class="btn icon" id="next" aria-label="Next">›</button>
+  </div>
+  <div class="seg" role="group" aria-label="View">
+    <button data-view="week" aria-pressed="true">Week</button>
+    <button data-view="board" aria-pressed="false">Board</button>
+    <button data-view="month" aria-pressed="false">Month</button>
+  </div>
+  <button class="btn primary" id="addBtn">Add task</button>
+  <button class="btn icon" id="setBtn" aria-label="Settings" title="Settings">⚙︎</button>
+</header>
+<div class="toolbar">
+  <input class="search" id="search" type="search" placeholder="Filter by client or task" aria-label="Filter by client or task">
+  <div class="legend"><span>From Double</span><span class="m">Added by me</span></div>
+  <div class="sync" id="sync"><span class="dot"></span><span>Starting up</span></div>
+</div>
+<div class="wrap">
+  <aside class="rail" id="rail"></aside>
+  <main class="main" id="main"></main>
+</div>
+
+<dialog id="dlg"></dialog>
+
+<script>
+(function(){
+"use strict";
+const DOUBLE = "Double";
+const POLL_MS = 10*60*1000;
+const PAGE = 100, MAX_PAGES = 6;
+
+/* ---------- date helpers (viewer's local calendar) ---------- */
+const pad = n => String(n).padStart(2,"0");
+const iso = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parse = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y,m-1,d); };
+const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+const monday = d => { const x = new Date(d.getFullYear(),d.getMonth(),d.getDate()); const w = (x.getDay()+6)%7; return addDays(x,-w); };
+const todayD = () => { const n = new Date(); return new Date(n.getFullYear(),n.getMonth(),n.getDate()); };
+const TODAY = () => iso(todayD());
+const fmtShort = s => parse(s).toLocaleDateString("en-US",{month:"short",day:"numeric"});
+const fmtLong = s => parse(s).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+const fmtMin = m => { if(!m) return "0m"; const h=Math.floor(m/60), r=m%60; return (h? h+"h":"")+(r? (h?" ":"")+r+"m":""); };
+const zone = () => { try { return new Intl.DateTimeFormat("en-US",{timeZoneName:"short"}).formatToParts(new Date()).find(p=>p.type==="timeZoneName").value; } catch(e){ return ""; } };
+
+/* ---------- tiny DOM helper (text only via textContent) ---------- */
+function el(tag, attrs, kids){
+  const n = document.createElement(tag);
+  if(attrs) for(const k in attrs){
+    const v = attrs[k];
+    if(v==null || v===false) continue;
+    if(k==="class") n.className = v;
+    else if(k==="text") n.textContent = v;
+    else if(k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if(k==="dataset") Object.assign(n.dataset, v);
+    else n.setAttribute(k, v===true? "" : v);
+  }
+  (kids||[]).forEach(c => { if(c==null) return; n.appendChild(typeof c==="string"? document.createTextNode(c) : c); });
+  return n;
+}
+
+/* ---------- state ---------- */
+const S = {
+  view: "week", anchor: todayD(), filter: "",
+  uid: null,
+  settings: { doubleUserId: null, capacityHours: 6, weekends: false, signoffs: true, dragMode: "plan" },
+  flash: null, clients: null, sections: null,
+  settingsLoaded: false,
+  plans: {},   // taskId -> {date, est}
+  items: {},   // docId -> manual task
+  dbt: { assigned: [], signoff: [] },
+  statuses: {}, openStatusIds: null,
+  users: [],
+  mcp: null, mcpChecked: false,
+  sync: { state: "idle", code: null, msg: "", at: null },
+  unsubs: []
+};
+
+/* ---------- storage: db per person, localStorage fallback ---------- */
+let db = null, coll = null;
+const LS_KEY = "soan-planner-v1";
+function lsRead(){ try { return JSON.parse(localStorage.getItem(LS_KEY)||"{}"); } catch(e){ return {}; } }
+function lsWrite(all){ try { localStorage.setItem(LS_KEY, JSON.stringify(all)); } catch(e){} }
+function applyDoc(id, data){
+  if(id==="settings"){ Object.assign(S.settings, data||{}); S.settingsLoaded = true; }
+  else if(id.startsWith("plan-")){ if(data) S.plans[id.slice(5)] = data; else delete S.plans[id.slice(5)]; }
+  else if(id.startsWith("item-")){ if(data) S.items[id] = data; else delete S.items[id]; }
+}
+async function put(id, data){
+  applyDoc(id, data); render();
+  if(coll){ try { await coll.doc(id).set(data); } catch(e){ toastErr("Couldn’t save that change. Check your connection and try again."); } }
+  else { const all = lsRead(); all[id] = data; lsWrite(all); }
+}
+async function del(id){
+  applyDoc(id, null); render();
+  if(coll){ try { await coll.doc(id).delete(); } catch(e){ toastErr("Couldn’t delete that. Try again."); } }
+  else { const all = lsRead(); delete all[id]; lsWrite(all); }
+}
+function toastErr(msg){ S.sync.saveErr = msg; render(); }
+
+/* ---------- normalize tasks ---------- */
+function doubleCards(){
+  const me = S.settings.doubleUserId;
+  const map = new Map();
+  S.dbt.assigned.forEach(t => map.set(t.id, {t, sign:false}));
+  if(S.settings.signoffs) S.dbt.signoff.forEach(t => { if(!map.has(t.id)) map.set(t.id, {t, sign:true}); else map.get(t.id).sign = true; });
+  const out = [];
+  map.forEach(({t, sign}) => {
+    if(!t.dueDate) return;
+    const plan = S.plans[t.id] || {};
+    const due = String(t.dueDate).slice(0,10);
+    out.push({
+      key: "d"+t.id, id: t.id, kind: "double",
+      title: t.name || "Untitled task", client: t.clientName || "Firm task",
+      due, planned: plan.date || null, date: plan.date || due, est: plan.est || 0,
+      status: t.status, statusName: (S.statuses[t.status]||{}).name || t.status,
+      link: t.deepLink, section: t.sectionName, period: t.monthDate,
+      sign: sign && t.assignedTo !== me, prio: !!t.priority, done: false,
+      category: t.category, endCloseId: t.endCloseId, clientId: t.clientId,
+      assignedTo: t.assignedTo, assignedToName: t.assignedToName, description: t.description || "", raw: t
+    });
+  });
+  return out;
+}
+function mineCards(){
+  return Object.entries(S.items).map(([id, it]) => ({
+    key: id, id, kind: "mine",
+    title: it.title || "Untitled", client: it.client || "",
+    due: it.due || null, planned: it.date || null, date: it.date || it.due || TODAY(),
+    est: it.est || 0, notes: it.notes || "", done: !!it.done, prio: !!it.prio
+  }));
+}
+function allCards(){
+  const f = S.filter.trim().toLowerCase();
+  let list = doubleCards().concat(mineCards());
+  if(f) list = list.filter(c => (c.title+" "+c.client+" "+(c.statusName||"")).toLowerCase().includes(f));
+  return list;
+}
+function sortCards(a,b){
+  if(a.done!==b.done) return a.done?1:-1;
+  if(a.prio!==b.prio) return a.prio?-1:1;
+  const ad = a.due||"9999", bd = b.due||"9999";
+  if(ad!==bd) return ad<bd?-1:1;
+  return (a.client+a.title).localeCompare(b.client+b.title);
+}
+
+/* ---------- cards ---------- */
+let dragKey = null;
+function card(c, opts){
+  const t = TODAY();
+  const tags = [];
+  if(c.due){
+    const late = c.due < t, soon = !late && c.due <= iso(addDays(todayD(),2));
+    tags.push(el("span",{class:"tag"+(late?" late":soon?" soon":""), text:(late?"Past due ":"Due ")+fmtShort(c.due)}));
+  }
+  if(c.kind==="double" && c.statusName && c.status!=="notStarted") tags.push(el("span",{class:"tag", text:c.statusName}));
+  if(c.sign) tags.push(el("span",{class:"tag sign", text:"Your sign-off"}));
+  if(c.prio) tags.push(el("span",{class:"tag prio", text:"Priority"}));
+  if(c.est) tags.push(el("span",{class:"tag", text:fmtMin(c.est)}));
+  if(c.kind==="mine") tags.push(el("span",{class:"tag mine", text:"Mine"}));
+  const b = el("button",{class:"card"+(c.kind==="mine"?" mine":"")+(c.done?" done":""), draggable:"true", dataset:{key:c.key},
+    "aria-label": (c.client? c.client+", ":"")+c.title,
+    onclick:()=>openDetail(c.key),
+    ondragstart:e=>{ dragKey=c.key; try{ e.dataTransfer.setData("text/plain", c.key); e.dataTransfer.effectAllowed="move"; }catch(_){} },
+    ondragend:()=>{ dragKey=null; }
+  },[
+    c.client? el("div",{class:"c", text:c.client}) : null,
+    el("div",{class:"t", text:c.title}),
+    tags.length? el("div",{class:"tags"}, tags) : null
+  ]);
+  return b;
+}
+function dropZone(node, dateFn){
+  node.addEventListener("dragover", e => { if(!dateFn()) return; e.preventDefault(); node.classList.add("drag-over"); });
+  node.addEventListener("dragleave", () => node.classList.remove("drag-over"));
+  node.addEventListener("drop", e => {
+    e.preventDefault(); node.classList.remove("drag-over");
+    let k = dragKey; try { k = e.dataTransfer.getData("text/plain") || k; } catch(_){}
+    const d = dateFn(); if(k && d) moveTo(k, d);
+  });
+}
+function findCard(key){ return doubleCards().concat(mineCards()).find(c => c.key===key); }
+function moveTo(key, date){
+  const c = findCard(key); if(!c) return;
+  if(c.kind==="mine"){ put(c.id, Object.assign({}, S.items[c.id], {date})); }
+  else if(S.settings.dragMode==="due" && S.mcp){ if(date!==c.due) confirmDoubleChanges(c, {due: date}); }
+  else { const p = Object.assign({}, S.plans[c.id]||{}); if(date===c.due) delete p.date; else p.date = date;
+    if(!p.date && !p.est) del("plan-"+c.id); else put("plan-"+c.id, p); }
+}
+
+/* ---------- render ---------- */
+function render(){
+  document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view===S.view)));
+  document.getElementById("nav").style.visibility = S.view==="board"? "hidden":"visible";
+  renderSync();
+  const main = document.getElementById("main"), rail = document.getElementById("rail");
+  main.replaceChildren(); rail.replaceChildren();
+
+  if(S.mcp && S.settingsLoaded && !S.settings.doubleUserId){ renderSetup(main); renderRail(rail, []); headerFor("setup"); return; }
+
+  const cards = allCards();
+  renderRail(rail, cards);
+  notices(main);
+  if(S.view==="week") renderWeek(main, cards);
+  else if(S.view==="board") renderBoard(main, cards);
+  else renderMonth(main, cards);
+}
+function headerFor(kind, a, b){
+  const h1 = document.getElementById("h1"), r = document.getElementById("range");
+  if(kind==="setup"){ h1.textContent="My week"; r.textContent=""; return; }
+  if(kind==="week"){ h1.textContent = (iso(monday(todayD()))===iso(a))? "This week" : "Week of "+fmtShort(iso(a)); r.textContent = fmtShort(iso(a))+" to "+fmtShort(iso(b)); }
+  if(kind==="board"){ h1.textContent="By when"; r.textContent="Drag a card to change the day you’ll work on it"; }
+  if(kind==="month"){ h1.textContent = a.toLocaleDateString("en-US",{month:"long",year:"numeric"}); r.textContent=""; }
+}
+function renderSync(){
+  const s = S.sync, box = document.getElementById("sync");
+  const dot = el("span",{class:"dot "+(s.state==="ok"?"ok":s.state==="error"?"err":s.state==="loading"?"busy":"")});
+  let label;
+  if(!S.mcpChecked) label = "Connecting to Double";
+  else if(!S.mcp) label = "Double not available here";
+  else if(s.state==="loading" && !s.at) label = "Loading your Double tasks";
+  else if(s.state==="error" && !s.at) label = "Double didn’t load";
+  else if(s.at){ const t = new Date(s.at).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}); label = "Synced from Double at "+t+" "+zone()+(s.state==="error"?" (last good copy)":""); }
+  else label = "Waiting";
+  const kids = [dot, el("span",{text:label})];
+  if(S.mcp && S.settings.doubleUserId) kids.push(el("button",{class:"linkbtn", text:"Refresh", onclick:refresh}));
+  box.replaceChildren(...kids);
+}
+function notices(main){
+  const s = S.sync;
+  if(S.flash){ main.appendChild(el("div",{class:"flash"},[el("span",{text:S.flash}), el("button",{class:"linkbtn",text:"Dismiss",onclick:()=>{S.flash=null;render();}})])); }
+  if(S.sync.saveErr){ main.appendChild(el("div",{class:"notice err"},[el("p",{text:S.sync.saveErr}), el("button",{class:"linkbtn",text:"Dismiss",onclick:()=>{S.sync.saveErr=null;render();}})])); }
+  if(S.mcpChecked && !S.mcp){
+    main.appendChild(el("div",{class:"notice"},[el("p",{text:"Double tasks can’t load in this view. Open this page in claude.ai with the Double connector added. Tasks you add yourself still work here."})]));
+    return;
+  }
+  if(s.state!=="error") return;
+  const msgs = {
+    needs_reauth: "Your Double connection has expired. Reconnect Double in claude.ai under Settings, then Connectors, and reload this page.",
+    server_not_connected: "The Double connector isn’t added to your claude.ai account. Add it under Settings, then Connectors, and reload this page.",
+    selection_required: "You have more than one Double connector. Choose which one this page should use when claude.ai asks, then reload.",
+    blocked_by_policy: "Your organization’s settings block this page from reading Double. Ask Brita or an admin.",
+    not_in_manifest: "This page doesn’t have permission to read Double for you yet.",
+    approval_required: "This page needs your OK to read your Double tasks.",
+    consent_required: "This page needs your OK to read your Double tasks."
+  };
+  const needsAllow = ["not_in_manifest","approval_required","consent_required"].includes(s.code);
+  main.appendChild(el("div",{class:"notice err"},[
+    el("p",{text: msgs[s.code] || ("Double didn’t respond: "+(s.msg||"unknown problem")+". Your plans are safe. Try Refresh in a minute.")}),
+    needsAllow? el("button",{class:"btn primary", text:"Allow Double access", onclick:()=>start(true)}) : null
+  ]));
+}
+
+function renderRail(rail, cards){
+  const t = TODAY();
+  const behind = cards.filter(c => !c.done && c.date < t).sort(sortCards);
+  rail.appendChild(el("h2",{},["Needs a new day", el("span",{class:"count"+(behind.length?"":" n"), text:String(behind.length)})]));
+  rail.appendChild(el("p",{class:"sub", text:"Past due or planned for a day that’s gone. Drag each one onto a day, or tap it to pick a date."}));
+  const list = el("div",{class:"list"});
+  if(!behind.length) list.appendChild(el("div",{class:"empty", text: S.sync.state==="loading"&&!S.sync.at? "Loading…" : "You’re caught up."}));
+  behind.slice(0,150).forEach(c => list.appendChild(card(c)));
+  if(behind.length>150) list.appendChild(el("div",{class:"empty", text:"Plus "+(behind.length-150)+" more. Use the filter to narrow them down."}));
+  rail.appendChild(list);
+}
+
+function renderWeek(main, cards){
+  const a = monday(S.anchor), days = S.settings.weekends? 7 : 5, b = addDays(a, days-1);
+  headerFor("week", a, b);
+  const grid = el("div",{class:"week", style:"grid-template-columns:repeat("+days+",minmax(200px,1fr))"});
+  const t = TODAY(), cap = (Number(S.settings.capacityHours)||0)*60;
+  for(let i=0;i<days;i++){
+    const d = addDays(a,i), ds = iso(d);
+    const dayCards = cards.filter(c => c.date===ds && !(ds<t && !c.done)).sort(sortCards);
+    const open = dayCards.filter(c=>!c.done);
+    const est = open.reduce((s,c)=>s+(c.est||0),0);
+    const pct = cap? Math.min(100, Math.round(est/cap*100)) : 0;
+    const head = el("div",{class:"col-h"},[
+      el("div",{class:"dn"},[el("span",{class:"num", text:String(d.getDate())}), el("span",{class:"wd", text:d.toLocaleDateString("en-US",{weekday:"long"})+(ds===t?", today":"")})]),
+      el("div",{class:"load"},[el("span",{text:open.length+(open.length===1?" task":" tasks")}), el("span",{text: est? fmtMin(est)+" of "+fmtMin(cap)+" estimated" : "No estimates yet"})]),
+      el("div",{class:"bar"+(est>cap&&cap?" over":"")},[el("i",{style:"width:"+pct+"%"})])
+    ]);
+    const body = el("div",{class:"col-b"});
+    if(!dayCards.length) body.appendChild(el("div",{class:"empty", text: ds<t? "" : "Nothing here yet. Drag a task in."}));
+    dayCards.forEach(c => body.appendChild(card(c)));
+    if(ds>=t) dropZone(body, ()=>ds);
+    grid.appendChild(el("section",{class:"col"+(ds===t?" today":""), "aria-label":fmtLong(ds)},[head, body]));
+  }
+  main.appendChild(grid);
+}
+
+function renderBoard(main, cards){
+  headerFor("board");
+  const td = todayD(), t = iso(td);
+  const tom = iso(addDays(td,1));
+  const weekEnd = iso(addDays(monday(td),6));
+  const nextMon = monday(addDays(td,7)), nextMonS = iso(nextMon), afterNext = iso(addDays(nextMon,7));
+  const laterThisWeekStart = iso(addDays(td,2));
+  const cols = [
+    {name:"Past due", late:true, test:c=>c.date<t, drop:null},
+    {name:"Today", test:c=>c.date===t, drop:t, sub:fmtShort(t)},
+    {name:"Tomorrow", test:c=>c.date===tom, drop:tom, sub:fmtShort(tom)},
+    {name:"Rest of this week", test:c=>c.date>tom && c.date<=weekEnd, drop: laterThisWeekStart<=weekEnd? laterThisWeekStart : null},
+    {name:"Next week", test:c=>c.date>weekEnd && c.date<afterNext, drop:nextMonS, sub:"From "+fmtShort(nextMonS)},
+    {name:"Later", test:c=>c.date>=afterNext, drop:afterNext}
+  ];
+  const board = el("div",{class:"board"});
+  const open = cards.filter(c=>!c.done);
+  cols.forEach(col => {
+    const list = open.filter(col.test).sort(sortCards);
+    const est = list.reduce((s,c)=>s+(c.est||0),0);
+    const body = el("div",{class:"bcol-b"});
+    if(!list.length) body.appendChild(el("div",{class:"empty", text: col.late? "Nothing past due." : "Empty"}));
+    list.slice(0,200).forEach(c => body.appendChild(card(c)));
+    if(col.drop) dropZone(body, ()=>col.drop);
+    board.appendChild(el("section",{class:"bcol"+(col.late?" late":"")},[
+      el("div",{class:"bcol-h"},[el("b",{text:col.name}), el("span",{text: list.length+(est? ", "+fmtMin(est):"") + (col.sub? ", ":"")+(col.sub||"")})]),
+      body
+    ]));
+  });
+  main.appendChild(board);
+}
+
+function renderMonth(main, cards){
+  const first = new Date(S.anchor.getFullYear(), S.anchor.getMonth(), 1);
+  headerFor("month", first);
+  const start = monday(first), t = TODAY();
+  const wrap = el("div",{class:"month"}), g = el("div",{class:"mgrid"});
+  ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(n => g.appendChild(el("div",{class:"mh", text:n})));
+  const open = cards.filter(c=>!c.done);
+  for(let i=0;i<42;i++){
+    const d = addDays(start,i), ds = iso(d);
+    if(i>=35 && d.getMonth()!==first.getMonth()) break;
+    const list = open.filter(c=>c.date===ds && !(ds<t)).sort(sortCards);
+    const cell = el("button",{class:"cell"+(d.getMonth()!==first.getMonth()?" out":"")+(ds===t?" today":""), "aria-label":fmtLong(ds)+", "+list.length+" tasks",
+      onclick:()=>{ S.anchor = d; setView("week"); }},[el("span",{class:"d", text:String(d.getDate())})]);
+    list.slice(0,3).forEach(c => cell.appendChild(el("span",{class:"chip"+(c.kind==="mine"?" mine":"")+(c.due&&c.due<t?" late":""), text:(c.client? c.client+": ":"")+c.title})));
+    if(list.length>3) cell.appendChild(el("span",{class:"more", text:"+"+(list.length-3)+" more"}));
+    if(ds>=t) dropZone(cell, ()=>ds);
+    g.appendChild(cell);
+  }
+  wrap.appendChild(g); main.appendChild(wrap);
+}
+
+function renderSetup(main){
+  const sel = el("select",{id:"meSel"},[el("option",{value:"", text: S.users.length? "Choose your name" : "Loading people from Double…"})]);
+  S.users.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(u => sel.appendChild(el("option",{value:String(u.id), text:u.name||u.email||("User "+u.id)})));
+  main.appendChild(el("div",{class:"setup"},[
+    el("h2",{text:"Who are you in Double?"}),
+    el("p",{text:"Pick your name once and the planner will pull every open task assigned to you, plus sign-offs waiting on you. You can change this later in Settings."}),
+    el("div",{class:"field"},[el("label",{for:"meSel", text:"Your Double profile"}), sel]),
+    el("div",{class:"actions"},[el("button",{class:"btn primary", text:"Show my tasks", onclick:()=>{
+      const v = Number(sel.value); if(!v) return; put("settings", Object.assign({}, S.settings, {doubleUserId:v})); watchTasks();
+    }})])
+  ]));
+}
+
+/* ---------- dialogs ---------- */
+const dlg = document.getElementById("dlg");
+function showDlg(content){ dlg.replaceChildren(content); if(!dlg.open) dlg.showModal(); }
+function closeDlg(){ if(dlg.open) dlg.close(); }
+dlg.addEventListener("click", e => { if(e.target===dlg) closeDlg(); });
+
+function estSelect(val, onchange){
+  const s = el("select",{onchange:e=>onchange(Number(e.target.value))});
+  [[0,"No estimate"],[15,"15 min"],[30,"30 min"],[45,"45 min"],[60,"1 hour"],[90,"1.5 hours"],[120,"2 hours"],[180,"3 hours"],[240,"4 hours"],[360,"6 hours"]].forEach(([v,l]) => s.appendChild(el("option",{value:String(v), text:l, selected: v===(val||0)})));
+  return s;
+}
+function quickButtons(onPick){
+  const td = todayD();
+  return el("div",{class:"quick"},[
+    ["Today", iso(td)], ["Tomorrow", iso(addDays(td,1))], ["Next Monday", iso(monday(addDays(td,7)))]
+  ].map(([l,d]) => el("button",{class:"btn", type:"button", text:l, onclick:()=>onPick(d)})));
+}
+
+function openDetail(key){
+  const c = findCard(key); if(!c) return;
+  if(c.kind==="mine") return openItemForm(c.id);
+  const plan = Object.assign({}, S.plans[c.id]||{});
+  const dateIn = el("input",{type:"date", value:c.date, id:"workOn"});
+  const savePlan = () => { if(!plan.date && !plan.est) del("plan-"+c.id); else put("plan-"+c.id, Object.assign({}, plan)); };
+  dateIn.addEventListener("change", () => { const v = dateIn.value; if(!v) return; if(v===c.due) delete plan.date; else plan.date = v; savePlan(); });
+
+  // Double fields (edited here, written only after the confirm step)
+  const f = {
+    name: el("input",{id:"dName", type:"text", value:c.title}),
+    status: el("select",{id:"dStatus"}),
+    due: el("input",{id:"dDue", type:"date", value:c.due}),
+    who: el("select",{id:"dWho"}),
+    prio: el("input",{id:"dPrio", type:"checkbox", checked:c.prio}),
+    desc: el("textarea",{id:"dDesc"})
+  };
+  f.desc.value = c.description || "";
+  Object.values(S.statuses).forEach(st => f.status.appendChild(el("option",{value:st.id, text:(st.name||st.id).trim(), selected: st.id===c.status})));
+  if(!S.statuses[c.status]) f.status.appendChild(el("option",{value:c.status, text:c.statusName||c.status, selected:true}));
+  f.who.appendChild(el("option",{value:"", text:"Unassigned", selected: !c.assignedTo}));
+  S.users.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(u => f.who.appendChild(el("option",{value:String(u.id), text:u.name||u.email||("User "+u.id), selected: u.id===c.assignedTo})));
+  const canWrite = !!S.mcp;
+  const collect = () => {
+    const ch = {};
+    const nm = f.name.value.trim(); if(nm && nm!==c.title) ch.name = nm;
+    if(f.status.value!==c.status) ch.status = f.status.value;
+    if(f.due.value && f.due.value!==c.due) ch.due = f.due.value;
+    const w = f.who.value? Number(f.who.value) : null; if(w!==(c.assignedTo||null)) ch.assignedTo = w;
+    if(f.prio.checked!==c.prio) ch.priority = f.prio.checked;
+    if((f.desc.value||"")!==(c.description||"")) ch.description = f.desc.value;
+    return ch;
+  };
+  const err = el("div");
+  const metaKids = [el("dt",{text:"Due"}), el("dd",{text: fmtLong(c.due)})];
+  if(c.section){ metaKids.push(el("dt",{text:"Section"}), el("dd",{text:c.section})); }
+  if(c.period){ metaKids.push(el("dt",{text:"Close period"}), el("dd",{text:c.period})); }
+  const doneId = S.statuses.done ? "done" : (Object.values(S.statuses).find(x=>x.isCompleted&&x.id!=="canceled")||{}).id;
+  showDlg(el("div",{class:"dlg"},[
+    el("h3",{text:c.title}),
+    el("div",{class:"client", text:c.client + (c.sign? ", waiting on your sign-off":"")}),
+    el("dl",{class:"meta"}, metaKids),
+    el("div",{class:"field"},[el("label",{for:"workOn", text:"Day I’ll work on it (planner only)"}), dateIn]),
+    quickButtons(d => { dateIn.value = d; dateIn.dispatchEvent(new Event("change")); }),
+    el("div",{class:"field"},[el("label",{text:"Time estimate (planner only)"}), estSelect(plan.est, v => { if(v) plan.est = v; else delete plan.est; savePlan(); })]),
+    plan.date? el("button",{class:"btn", type:"button", text:"Put it back on its due date", onclick:()=>{ delete plan.date; savePlan(); closeDlg(); }}) : null,
+
+    el("div",{class:"section-h", text:"Edit in Double"}),
+    canWrite? null : el("p",{class:"hint", text:"Double isn’t connected in this view, so these fields are read only."}),
+    el("div",{class:"field"},[el("label",{for:"dName", text:"Task name"}), f.name]),
+    el("div",{class:"row"},[
+      el("div",{class:"field"},[el("label",{for:"dStatus", text:"Status"}), f.status]),
+      el("div",{class:"field"},[el("label",{for:"dDue", text:"Due date"}), f.due])
+    ]),
+    el("div",{class:"field"},[el("label",{for:"dWho", text:"Assigned to"}), f.who]),
+    el("div",{class:"field"},[el("label",{for:"dDesc", text:"Description"}), f.desc]),
+    el("label",{class:"check"},[f.prio, "Priority"]),
+    err,
+    el("div",{class:"actions"},[
+      c.link? el("a",{class:"btn spacer", href:c.link, target:"_blank", rel:"noopener", text:"Open in Double"}) : el("span",{class:"spacer"}),
+      canWrite && doneId && c.status!==doneId? el("button",{class:"btn", text:"Mark done in Double", onclick:()=>confirmDoubleChanges(c, {status: doneId})}) : null,
+      el("button",{class:"btn", text:"Close", onclick:closeDlg}),
+      canWrite? el("button",{class:"btn primary", text:"Review changes", onclick:()=>{
+        const ch = collect();
+        if(!Object.keys(ch).length){ err.replaceChildren(el("div",{class:"hint", text:"Nothing has changed yet."})); return; }
+        confirmDoubleChanges(c, ch);
+      }}) : null
+    ])
+  ]));
+  if(!canWrite) Object.values(f).forEach(x => x.disabled = true);
+}
+
+function clientOptions(){
+  const set = new Set();
+  S.dbt.assigned.concat(S.dbt.signoff).forEach(t => t.clientName && set.add(t.clientName));
+  Object.values(S.items).forEach(i => i.client && set.add(i.client));
+  return Array.from(set).sort();
+}
+function openItemForm(id){
+  const isNew = !id;
+  const base = isNew? { title:"", client:"", date: S.view==="week" && iso(monday(S.anchor))>TODAY()? iso(monday(S.anchor)) : TODAY(), due:"", est:0, notes:"", done:false, prio:false } : Object.assign({}, S.items[id]);
+  const docId = id || ("item-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7));
+  const f = {
+    title: el("input",{id:"fT", type:"text", value:base.title, required:true, placeholder:"What needs doing?"}),
+    client: el("input",{id:"fC", type:"text", value:base.client, list:"clientList", placeholder:"Optional"}),
+    date: el("input",{id:"fD", type:"date", value:base.date||TODAY()}),
+    due: el("input",{id:"fDue", type:"date", value:base.due||""}),
+    notes: el("textarea",{id:"fN", placeholder:"Optional"}),
+    prio: el("input",{id:"fP", type:"checkbox", checked:!!base.prio}),
+    done: el("input",{id:"fX", type:"checkbox", checked:!!base.done})
+  };
+  f.notes.value = base.notes||"";
+  let est = base.est||0;
+  const dl = el("datalist",{id:"clientList"}, clientOptions().map(n => el("option",{value:n})));
+  const err = el("p",{style:"color:var(--red);margin:6px 0 0;font-size:13px"});
+  const save = () => {
+    const title = f.title.value.trim();
+    if(!title){ err.textContent = "Give the task a name."; f.title.focus(); return; }
+    put(docId, { title, client:f.client.value.trim(), date:f.date.value||TODAY(), due:f.due.value||null, est, notes:f.notes.value.trim(), prio:f.prio.checked, done:f.done.checked, createdAt: base.createdAt || Date.now() });
+    closeDlg();
+  };
+  const snapshot = () => ({ title:f.title.value.trim(), client:f.client.value.trim(), due:f.due.value||f.date.value||"", notes:f.notes.value.trim(), prio:f.prio.checked, est, fromItem: isNew? null : docId });
+  showDlg(el("div",{class:"dlg"},[
+    el("h3",{text: isNew? "Add a task" : "Edit task"}),
+    isNew && S.mcp? el("div",{class:"toggle", role:"group", "aria-label":"Where this task goes"},[
+      el("button",{type:"button", "aria-pressed":"true", text:"Planner only"}),
+      el("button",{type:"button", "aria-pressed":"false", text:"Create in Double", onclick:()=>openCreateDouble(snapshot())})
+    ]) : null,
+    el("p",{style:"color:var(--muted);margin:2px 0 0;font-size:14px", text:"Planner-only tasks are for work that isn’t in Double, like calls, follow-ups, training or admin. Only you see them."}),
+    el("div",{class:"field"},[el("label",{for:"fT", text:"Task"}), f.title]),
+    el("div",{class:"field"},[el("label",{for:"fC", text:"Client"}), f.client, dl]),
+    el("div",{class:"row"},[
+      el("div",{class:"field"},[el("label",{for:"fD", text:"Day I’ll work on it"}), f.date]),
+      el("div",{class:"field"},[el("label",{for:"fDue", text:"Due date"}), f.due])
+    ]),
+    quickButtons(d => { f.date.value = d; }),
+    el("div",{class:"field"},[el("label",{text:"Time estimate"}), estSelect(est, v => { est = v; })]),
+    el("div",{class:"field"},[el("label",{for:"fN", text:"Notes"}), f.notes]),
+    el("label",{class:"check"},[f.prio, "Priority"]),
+    isNew? null : el("label",{class:"check"},[f.done, "Done"]),
+    err,
+    el("div",{class:"actions"},[
+      isNew? el("span",{class:"spacer"}) : el("button",{class:"btn danger spacer", text:"Delete", onclick:()=>{ del(docId); closeDlg(); }}),
+      !isNew && S.mcp? el("button",{class:"btn", text:"Send to Double", onclick:()=>openCreateDouble(snapshot())}) : null,
+      el("button",{class:"btn", text:"Cancel", onclick:closeDlg}),
+      el("button",{class:"btn primary", text: isNew? "Add task" : "Save", onclick:save})
+    ])
+  ]));
+  f.title.addEventListener("keydown", e => { if(e.key==="Enter") save(); });
+  setTimeout(()=>f.title.focus(), 30);
+}
+
+function openSettings(){
+  const st = Object.assign({}, S.settings);
+  const sel = el("select",{id:"sMe"},[el("option",{value:"", text: S.users.length? "Choose your name" : "People list not loaded"})]);
+  S.users.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(u => sel.appendChild(el("option",{value:String(u.id), text:u.name||u.email||("User "+u.id), selected: u.id===st.doubleUserId})));
+  const cap = el("input",{id:"sCap", type:"number", min:"1", max:"12", step:"0.5", value:String(st.capacityHours||6)});
+  const wk = el("input",{id:"sWk", type:"checkbox", checked:!!st.weekends});
+  const so = el("input",{id:"sSo", type:"checkbox", checked:st.signoffs!==false});
+  const dm = el("select",{id:"sDm"},[
+    el("option",{value:"plan", text:"Plan the day I’ll work on it (Double unchanged)", selected: st.dragMode!=="due"}),
+    el("option",{value:"due", text:"Change the due date in Double (I confirm each one)", selected: st.dragMode==="due"})
+  ]);
+  showDlg(el("div",{class:"dlg"},[
+    el("h3",{text:"Settings"}),
+    el("div",{class:"field"},[el("label",{for:"sMe", text:"Your Double profile"}), sel]),
+    el("div",{class:"field"},[el("label",{for:"sCap", text:"Hours of focused work per day"}), cap]),
+    el("div",{class:"field"},[el("label",{for:"sDm", text:"When I drag a Double task to a new day"}), dm]),
+    el("label",{class:"check"},[so, "Include tasks waiting on my sign-off"]),
+    el("label",{class:"check"},[wk, "Show weekends in the week view"]),
+    el("div",{class:"actions"},[
+      el("button",{class:"btn", text:"Cancel", onclick:closeDlg}),
+      el("button",{class:"btn primary", text:"Save", onclick:()=>{
+        const meChanged = Number(sel.value||0) !== st.doubleUserId;
+        put("settings", Object.assign({}, st, { doubleUserId: Number(sel.value)||st.doubleUserId, capacityHours: Number(cap.value)||6, weekends: wk.checked, signoffs: so.checked, dragMode: dm.value }));
+        closeDlg(); if(meChanged) watchTasks();
+      }})
+    ])
+  ]));
+}
+
+/* ---------- Writing to Double (always behind a confirm step) ---------- */
+const UPDATE_TOOL = { closing:"update_closing_task", custom:"update_custom_task", firm:"update_firm_task", project:"update_project_task" };
+const GET_KIND = c => c==="closing"? "closing" : c==="project"? "project" : "custom";
+const userName = id => { if(id==null) return "Unassigned"; const u = S.users.find(x=>x.id===id); return u? (u.name||u.email) : "User "+id; };
+const statusName = id => ((S.statuses[id]||{}).name || id || "").trim();
+const monthLabel = d => d.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+function friendlyWriteError(e){
+  const code = e && e.code;
+  if(code==="tool_error") return "Double said no: "+((e.message||"").slice(0,300) || "the change was rejected")+".";
+  if(code==="approval_required"||code==="consent_required"||code==="not_in_manifest") return "This page needs your OK to change Double. Approve it when claude.ai asks, then try again.";
+  if(code==="needs_reauth") return "Your Double connection expired. Reconnect Double in claude.ai under Settings, then Connectors.";
+  if(code==="blocked_by_policy") return "Your organization’s settings block this change from here. Make it in Double instead.";
+  if(code==="server_unavailable"||code==="upstream_error") return "Double didn’t answer in time, so this change may or may not have saved. Click Refresh and check the task before trying again.";
+  if(code==="close_range") return e.message;
+  return "That didn’t save: "+((e&&e.message)||"unknown problem")+".";
+}
+// Close tasks store due dates as a day of the month: positive = the close's reference month, negative = the month before it.
+async function closingDueNumber(c, targetIso){
+  const r = await S.mcp.callTool(DOUBLE, "get_task", {kind:"closing", taskId:c.id}, {cache:false});
+  const raw = r.payload && r.payload.dueDate;
+  const rule = r.payload && r.payload.dueDateBusinessDayType;
+  let ref;
+  if(typeof raw==="number" && raw!==0 && c.due){ const cur = parse(c.due); ref = raw>0? new Date(cur.getFullYear(),cur.getMonth(),1) : new Date(cur.getFullYear(),cur.getMonth()+1,1); }
+  else { const [mm,yy] = String(c.period||"").split("-").map(Number); ref = new Date(yy, mm, 1); }
+  const t = parse(targetIso), prev = new Date(ref.getFullYear(), ref.getMonth()-1, 1);
+  let n;
+  if(t.getFullYear()===ref.getFullYear() && t.getMonth()===ref.getMonth()) n = t.getDate();
+  else if(t.getFullYear()===prev.getFullYear() && t.getMonth()===prev.getMonth()) n = -t.getDate();
+  else throw {code:"close_range", message:"Close tasks for the "+c.period+" close can only be due in "+monthLabel(prev)+" or "+monthLabel(ref)+". Pick a date in one of those months, or change the close itself in Double."};
+  return { n, replacesRule: !!rule };
+}
+async function verifyClosingDue(id, n){
+  try { const r = await S.mcp.callTool(DOUBLE, "get_task", {kind:"closing", taskId:id}, {cache:false}); return r.payload && r.payload.dueDate===n; } catch(_){ return null; }
+}
+function confirmView(title, lines, notes, onConfirm, onBack){
+  const errBox = el("div");
+  const go = el("button",{class:"btn primary", text:"Save to Double"});
+  const back = el("button",{class:"btn", text:"Back", onclick:onBack||closeDlg});
+  go.onclick = async () => {
+    go.disabled = back.disabled = true; go.textContent = "Saving…"; errBox.replaceChildren();
+    try { await onConfirm(); }
+    catch(e){ go.disabled = back.disabled = false; go.textContent = "Try again"; errBox.replaceChildren(el("div",{class:"errbox", text:friendlyWriteError(e)})); }
+  };
+  showDlg(el("div",{class:"dlg"},[
+    el("h3",{text:title}),
+    el("ul",{class:"changes"}, lines.map(l => el("li",{text:l}))),
+    ...(notes||[]).map(n => el("div",{class:"warn", text:n})),
+    errBox,
+    el("div",{class:"actions"},[el("span",{class:"spacer"}), back, go])
+  ]));
+}
+async function confirmDoubleChanges(c, ch){
+  const lines = [], notes = [], args = { taskId: c.id };
+  if(ch.name!=null){ lines.push("Rename to “"+ch.name+"”"); args.name = ch.name; }
+  if(ch.status!=null){ lines.push("Status: "+statusName(c.status)+" to "+statusName(ch.status)); args.status = ch.status;
+    if((S.statuses[ch.status]||{}).isCompleted) notes.push("This completes the task in Double."); }
+  let dueN = null;
+  if(ch.due!=null){
+    lines.push("Due date: "+fmtShort(c.due)+" to "+fmtShort(ch.due));
+    if(c.category==="closing"){
+      try { const r = await closingDueNumber(c, ch.due); dueN = r.n; args.dueDate = r.n; if(r.replacesRule) notes.push("This task uses a business-day rule in Double. Saving sets a fixed date for this close instead."); }
+      catch(e){ showDlg(el("div",{class:"dlg"},[el("h3",{text:"Can’t move that due date"}), el("div",{class:"errbox", text:friendlyWriteError(e)}), el("div",{class:"actions"},[el("button",{class:"btn primary", text:"OK", onclick:()=>openDetail(c.key)})])])); return; }
+    } else args.dueDate = ch.due;
+    if(c.raw && c.raw.partOfRecurringSeries) notes.push("This task is part of a repeating series. Only this one is moved.");
+  }
+  if(ch.assignedTo!==undefined){ lines.push("Assign: "+userName(c.assignedTo)+" to "+userName(ch.assignedTo)); args.assignedTo = ch.assignedTo; }
+  if(ch.priority!=null){ lines.push(ch.priority? "Mark as priority" : "Remove priority"); args.priority = ch.priority; }
+  if(ch.description!=null){ lines.push("Update the description"); args.description = ch.description; }
+  const tool = UPDATE_TOOL[c.category];
+  if(!tool){ toastErr("This kind of task can’t be edited from the planner yet. Open it in Double."); closeDlg(); return; }
+  confirmView("Save to Double?", [c.client+": "+c.title, ...lines], notes, async () => {
+    await S.mcp.callTool(DOUBLE, tool, args, {cache:false});
+    // Reflect it right away; the refresh below brings Double's own copy.
+    const t = S.dbt.assigned.concat(S.dbt.signoff).filter(x => x.id===c.id);
+    t.forEach(x => { if(args.name) x.name = args.name; if(args.status) x.status = args.status; if(ch.due) x.dueDate = ch.due;
+      if(args.assignedTo!==undefined){ x.assignedTo = args.assignedTo; x.assignedToName = userName(args.assignedTo); }
+      if(args.priority!=null) x.priority = args.priority; if(args.description!=null) x.description = args.description; });
+    if(ch.due && S.plans[c.id] && S.plans[c.id].date){ const p = Object.assign({}, S.plans[c.id]); delete p.date; if(p.est) put("plan-"+c.id, p); else del("plan-"+c.id); }
+    let msg = "Saved to Double: "+c.title+".";
+    if(dueN!=null){ const ok = await verifyClosingDue(c.id, dueN); if(ok===false) msg = "Saved, but Double shows a different due date than expected for "+c.title+". Please check it in Double."; }
+    S.flash = msg; closeDlg(); render(); refresh();
+  }, () => openDetail(c.key));
+}
+
+async function loadClients(){
+  if(S.clients) return S.clients;
+  const out = [];
+  for(let p=1;p<=5;p++){
+    const r = await S.mcp.callTool(DOUBLE, "list_clients", {status:"active", pageSize:100, page:p}, {cache:{staleTime:3600e3, gcTime:24*3600e3}});
+    const pl = r.payload||{}; out.push(...(pl.clients||[]));
+    if(out.length >= (pl.totalCount||0)) break;
+  }
+  S.clients = out.sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+  return S.clients;
+}
+async function loadSections(){
+  if(S.sections) return S.sections;
+  const r = await S.mcp.callTool(DOUBLE, "list_sections", {}, {cache:{staleTime:3600e3, gcTime:24*3600e3}});
+  S.sections = (r.payload && r.payload.sections) || [];
+  return S.sections;
+}
+
+async function openCreateDouble(pre){
+  pre = pre || {};
+  showDlg(el("div",{class:"dlg"},[el("h3",{text:"Create in Double"}), el("p",{class:"hint", text:"Loading clients and sections from Double…"})]));
+  try { await Promise.all([loadClients(), loadSections()]); }
+  catch(e){ showDlg(el("div",{class:"dlg"},[el("h3",{text:"Create in Double"}), el("div",{class:"errbox", text:friendlyWriteError(e)}), el("div",{class:"actions"},[el("button",{class:"btn", text:"Close", onclick:closeDlg})])])); return; }
+  let kind = pre.kind || "custom";
+  const f = {
+    title: el("input",{id:"cT", type:"text", value:pre.title||"", placeholder:"What needs doing?"}),
+    client: el("input",{id:"cC", type:"text", value:"", list:"cClients", placeholder:"Start typing a client name"}),
+    period: el("select",{id:"cP"}),
+    section: el("select",{id:"cS"}),
+    due: el("input",{id:"cD", type:"date", value: pre.due || TODAY()}),
+    who: el("select",{id:"cW"}),
+    rep: el("select",{id:"cR"},[el("option",{value:"", text:"Doesn’t repeat"}), el("option",{value:"WEEKLY", text:"Every week on this weekday"}), el("option",{value:"MONTHLY", text:"Every month on this day"})]),
+    desc: el("textarea",{id:"cN"}),
+    prio: el("input",{id:"cPr", type:"checkbox", checked:!!pre.prio})
+  };
+  f.desc.value = pre.notes || "";
+  const match = S.clients.find(x => pre.client && x.name.toLowerCase()===pre.client.toLowerCase());
+  if(match) f.client.value = match.name;
+  const dl = el("datalist",{id:"cClients"}, S.clients.map(x => el("option",{value:x.name})));
+  S.users.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(u => f.who.appendChild(el("option",{value:String(u.id), text:u.name||u.email, selected:u.id===S.settings.doubleUserId})));
+  const td = todayD();
+  for(let i=0;i<3;i++){ const d = new Date(td.getFullYear(), td.getMonth()-1-i, 1); const md = pad(d.getMonth()+1)+"-"+d.getFullYear(); f.period.appendChild(el("option",{value:md, text:monthLabel(d)+" close"})); }
+  const fillSections = () => {
+    const cat = kind==="closing"? "closing" : kind==="firm"? "firm" : "custom";
+    f.section.replaceChildren(...S.sections.filter(x=>x.category===cat).map(x => el("option",{value:x.type, text:x.name})));
+  };
+  const clientRow = el("div",{class:"field"},[el("label",{for:"cC", text:"Client"}), f.client, dl]);
+  const periodRow = el("div",{class:"field"},[el("label",{for:"cP", text:"Close period"}), f.period]);
+  const repRow = el("div",{class:"field"},[el("label",{for:"cR", text:"Repeats"}), f.rep]);
+  const err = el("div");
+  const kinds = [["custom","Client task"],["closing","Close task"],["firm","Firm task"]];
+  const tg = el("div",{class:"toggle", role:"group", "aria-label":"Type of Double task"});
+  const sync = () => {
+    tg.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.k===kind)));
+    clientRow.style.display = kind==="firm"? "none" : "";
+    periodRow.style.display = kind==="closing"? "" : "none";
+    repRow.style.display = kind==="closing"? "none" : "";
+    fillSections();
+  };
+  kinds.forEach(([k,l]) => tg.appendChild(el("button",{type:"button", dataset:{k}, text:l, onclick:()=>{ kind=k; sync(); }})));
+  const review = async () => {
+    err.replaceChildren();
+    const name = f.title.value.trim();
+    if(!name) return err.replaceChildren(el("div",{class:"errbox", text:"Give the task a name."}));
+    let client = null;
+    if(kind!=="firm"){
+      client = S.clients.find(x => x.name.toLowerCase()===f.client.value.trim().toLowerCase());
+      if(!client) return err.replaceChildren(el("div",{class:"errbox", text:"Pick a client from the list so the task lands on the right account."}));
+    }
+    const due = f.due.value; if(!due) return err.replaceChildren(el("div",{class:"errbox", text:"Pick a due date."}));
+    const who = Number(f.who.value)||undefined;
+    const lines = [], notes = [];
+    let tool, args;
+    if(kind==="closing"){
+      const [mm,yy] = f.period.value.split("-").map(Number);
+      const ref = new Date(yy, mm, 1), prev = new Date(yy, mm-1, 1), t = parse(due);
+      let n;
+      if(t.getFullYear()===ref.getFullYear() && t.getMonth()===ref.getMonth()) n = t.getDate();
+      else if(t.getFullYear()===prev.getFullYear() && t.getMonth()===prev.getMonth()) n = -t.getDate();
+      else return err.replaceChildren(el("div",{class:"errbox", text:"For the "+monthLabel(prev)+" close, pick a due date in "+monthLabel(prev)+" or "+monthLabel(ref)+"."}));
+      let endCloseId = null;
+      try {
+        const r = await S.mcp.callTool(DOUBLE, "list_tasks", {clientId:client.id, category:"closing", monthDate:f.period.value, pageSize:1}, {cache:{staleTime:60e3}});
+        const tk = (r.payload && r.payload.tasks || [])[0]; endCloseId = tk && tk.endCloseId;
+      } catch(e){ return err.replaceChildren(el("div",{class:"errbox", text:friendlyWriteError(e)})); }
+      if(!endCloseId) return err.replaceChildren(el("div",{class:"errbox", text:"Couldn’t find a "+monthLabel(prev)+" close for "+client.name+" in Double. Create the close in Double first, or pick another period."}));
+      tool = "create_closing_task";
+      args = { endCloseId, taskName:name, taskType:f.section.value, dueDate:n, priority:f.prio.checked };
+      lines.push("Close task for "+client.name+", "+monthLabel(prev)+" close");
+    } else {
+      tool = kind==="firm"? "create_firm_task" : "create_custom_task";
+      args = { name, dueDate:due, priority:f.prio.checked, type:f.section.value };
+      if(client) args.clientId = client.id;
+      lines.push((kind==="firm"? "Firm task" : "Client task for "+client.name));
+      if(f.rep.value){
+        if(due < TODAY()) return err.replaceChildren(el("div",{class:"errbox", text:"A repeating task has to start today or later."}));
+        const wd = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"][parse(due).getDay()];
+        args.recurrence = f.rep.value==="WEEKLY"? {cycle:"WEEKLY", from:due, config:{dayOfWeek:wd}} : {cycle:"MONTHLY", from:due, config:{dayOfMonth: parse(due).getDate()}};
+        lines.push(f.rep.value==="WEEKLY"? "Repeats every "+parse(due).toLocaleDateString("en-US",{weekday:"long"}) : "Repeats monthly on day "+parse(due).getDate());
+      }
+    }
+    if(who) args.assignedTo = who;
+    if(f.desc.value.trim()) args.description = f.desc.value.trim();
+    lines.push("Name: “"+name+"”", "Section: "+(f.section.selectedOptions[0]||{}).textContent, "Due "+fmtLong(due), "Assigned to "+userName(who||null));
+    if(f.prio.checked) lines.push("Priority");
+    if(pre.fromItem) notes.push("Your planner-only copy will be removed once it’s in Double.");
+    confirmView("Create this in Double?", lines, notes, async () => {
+      await S.mcp.callTool(DOUBLE, tool, args, {cache:false});
+      if(pre.fromItem) await del(pre.fromItem);
+      S.flash = "Created in Double: "+name+"."; closeDlg(); render(); refresh();
+    }, () => openCreateDouble(Object.assign({}, pre, {kind, title:name, due, notes:f.desc.value, prio:f.prio.checked, client: client? client.name : pre.client})));
+  };
+  showDlg(el("div",{class:"dlg"},[
+    el("h3",{text:"Create in Double"}),
+    tg,
+    el("div",{class:"field"},[el("label",{for:"cT", text:"Task name"}), f.title]),
+    clientRow, periodRow,
+    el("div",{class:"field"},[el("label",{for:"cS", text:"Section"}), f.section]),
+    el("div",{class:"row"},[
+      el("div",{class:"field"},[el("label",{for:"cD", text:"Due date"}), f.due]),
+      el("div",{class:"field"},[el("label",{for:"cW", text:"Assigned to"}), f.who])
+    ]),
+    repRow,
+    el("div",{class:"field"},[el("label",{for:"cN", text:"Description"}), f.desc]),
+    el("label",{class:"check"},[f.prio, "Priority"]),
+    err,
+    el("div",{class:"actions"},[el("span",{class:"spacer"}), el("button",{class:"btn", text:"Cancel", onclick:closeDlg}), el("button",{class:"btn primary", text:"Review", onclick:review})])
+  ]));
+  sync();
+  setTimeout(()=>f.title.focus(), 30);
+}
+
+/* ---------- Double via connector ---------- */
+function mcpFail(e){
+  const code = (e && e.code) || "upstream_error";
+  const authz = ["needs_reauth","server_not_connected","blocked_by_policy","approval_required","not_in_manifest","selection_required","consent_required","not_granted","capability_disabled"];
+  if(authz.includes(code)){ S.dbt = {assigned:[], signoff:[]}; S.sync.at = null; }
+  S.sync.state = "error"; S.sync.code = code; S.sync.msg = (e && e.message) || "";
+  render();
+}
+async function loadBasics(){
+  const opt = await S.mcp.callTool(DOUBLE, "list_task_filter_options", {}, {cache:{staleTime:6*3600e3, gcTime:24*3600e3}});
+  const st = (opt.payload && opt.payload.taskStatuses) || [];
+  S.statuses = {}; st.forEach(s => S.statuses[s.id] = s);
+  S.openStatusIds = st.filter(s=>!s.isCompleted).map(s=>s.id);
+  const us = await S.mcp.callTool(DOUBLE, "list_users", {pageSize:100}, {cache:{staleTime:6*3600e3, gcTime:24*3600e3}});
+  S.users = (us.payload && us.payload.users) || [];
+}
+async function autoMatchMe(){
+  for(let i=0;i<40 && !S.settingsLoaded;i++) await new Promise(r=>setTimeout(r,250));
+  if(S.settings.doubleUserId) return;
+  try{
+    const user = await window.claude.use("user"); if(!user) return;
+    const me = await user.me();
+    const email = me && me.email && me.email.toLowerCase();
+    if(!email) return;
+    const hit = S.users.find(u => (u.email||"").toLowerCase()===email);
+    if(hit) await put("settings", Object.assign({}, S.settings, {doubleUserId: hit.id}));
+  }catch(_){}
+}
+function baseQuery(){
+  const td = todayD();
+  const q = { dueDateFrom: iso(addDays(td,-120)), dueDateTo: iso(addDays(td,75)), pageSize: PAGE };
+  if(S.openStatusIds && S.openStatusIds.length) q.status = S.openStatusIds;
+  return q;
+}
+async function morePages(input, total){
+  const pages = Math.min(Math.ceil(total/PAGE), MAX_PAGES), out = [];
+  for(let p=2;p<=pages;p++){
+    const r = await S.mcp.callTool(DOUBLE, "list_tasks", Object.assign({}, input, {page:p}), {cache:{staleTime:60e3}});
+    out.push(...((r.payload && r.payload.tasks)||[]));
+  }
+  return out;
+}
+function watchOne(slot, input){
+  const un = S.mcp.watchTool(DOUBLE, "list_tasks", input, async ev => {
+    if(ev.type==="error") return mcpFail(ev.error);
+    const p = ev.result.payload || {};
+    let tasks = (p.tasks||[]).slice();
+    try { if((p.totalCount||0) > PAGE) tasks = tasks.concat(await morePages(input, p.totalCount)); } catch(e){ /* keep first page */ }
+    const done = new Set(Object.values(S.statuses).filter(s=>s.isCompleted).map(s=>s.id));
+    S.dbt[slot] = tasks.filter(t => !done.has(t.status));
+    S.sync.state = "ok"; S.sync.code = null;
+    S.sync.at = (ev.result.cache && ev.result.cache.storedAt) || Date.now();
+    render();
+  }, { refetchInterval: POLL_MS, cache:{ staleTime: 5*60e3, gcTime: 24*3600e3 } });
+  S.unsubs.push(un);
+}
+function watchTasks(){
+  S.unsubs.forEach(u => { try{u();}catch(_){} }); S.unsubs = [];
+  const me = S.settings.doubleUserId; if(!S.mcp || !me) return;
+  S.dbt = {assigned:[], signoff:[]};
+  S.sync.state = "loading"; S.sync.at = null; render();
+  watchOne("assigned", Object.assign(baseQuery(), {assignedTo: me}));
+  watchOne("signoff", Object.assign(baseQuery(), {nextSignOffUser: me}));
+}
+async function refresh(){
+  if(!S.mcp) return;
+  S.sync.state = "loading"; render();
+  try { await S.mcp.invalidate(DOUBLE, "list_tasks"); } catch(_){ watchTasks(); }
+}
+async function start(fromClick){
+  if(!S.mcp) return;
+  S.sync.state = "loading"; render();
+  try {
+    await loadBasics();
+    await autoMatchMe();
+    render();
+    watchTasks();
+  } catch(e){
+    if(e && e.retryable && !fromClick){ setTimeout(()=>start(false), (e.retryAfterMs||2500)+Math.random()*1000); return; }
+    mcpFail(e);
+  }
+}
+
+/* ---------- boot ---------- */
+function setView(v){ S.view = v; try{ if(location.hash.slice(1)!==v) location.hash = v; }catch(_){} render(); }
+function fromHash(){ const h = (location.hash||"").slice(1); if(["week","board","month"].includes(h)) S.view = h; }
+window.addEventListener("hashchange", () => { fromHash(); render(); });
+document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => setView(b.dataset.view)));
+document.getElementById("prev").onclick = () => { S.anchor = S.view==="month"? new Date(S.anchor.getFullYear(), S.anchor.getMonth()-1, 1) : addDays(S.anchor,-7); render(); };
+document.getElementById("next").onclick = () => { S.anchor = S.view==="month"? new Date(S.anchor.getFullYear(), S.anchor.getMonth()+1, 1) : addDays(S.anchor,7); render(); };
+document.getElementById("todayBtn").onclick = () => { S.anchor = todayD(); render(); };
+document.getElementById("addBtn").onclick = () => openItemForm(null);
+document.getElementById("setBtn").onclick = openSettings;
+document.getElementById("search").addEventListener("input", e => { S.filter = e.target.value; render(); });
+let lastDay = TODAY();
+setInterval(() => { if(TODAY()!==lastDay){ lastDay = TODAY(); render(); } }, 60e3);
+
+fromHash();
+render();
+
+(async function boot(){
+  const hasClaude = !!(window.claude && window.claude.use);
+  // Personal storage
+  let loadTimer = setTimeout(() => { if(!S.settingsLoaded){ S.settingsLoaded = true; render(); } }, 10000);
+  try {
+    db = hasClaude? await window.claude.use("db") : null;
+    const user = hasClaude? await window.claude.use("user") : null;
+    S.uid = user? await user.id() : null;
+    if(db && S.uid){
+      coll = db.collection("data/users/"+S.uid);
+      coll.onSnapshot(snap => {
+        clearTimeout(loadTimer);
+        S.plans = {}; S.items = {};
+        snap.docs.forEach(d => applyDoc(d.id, d.data()));
+        S.settingsLoaded = true;
+        const before = S._lastMe; S._lastMe = S.settings.doubleUserId;
+        if(S.mcp && S.openStatusIds && S.settings.doubleUserId && before !== S.settings.doubleUserId && !S.unsubs.length) watchTasks();
+        render();
+      }, () => { coll = null; fallbackLocal(); });
+    } else fallbackLocal();
+  } catch(_){ fallbackLocal(); }
+  function fallbackLocal(){
+    clearTimeout(loadTimer);
+    const all = lsRead(); Object.keys(all).forEach(k => applyDoc(k, all[k])); S.settingsLoaded = true; render();
+  }
+  // Double
+  try { S.mcp = hasClaude? await window.claude.use("mcp") : null; } catch(_){ S.mcp = null; }
+  S.mcpChecked = true; render();
+  if(S.mcp) start(false);
+})();
+})();
+</script>
+</body>
+</html>
